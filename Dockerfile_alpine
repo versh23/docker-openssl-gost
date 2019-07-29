@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.9
 
 RUN apk add  --no-cache --virtual .build-deps wget \
         coreutils \
@@ -13,11 +13,12 @@ RUN apk add  --no-cache --virtual .build-deps wget \
 		pkgconf \
 		re2c \
 		linux-headers \
+		cmake \
 	&& mkdir -p /usr/local/src
 
 # Build openssl
-ARG OPENSSL_VERSION=1.1.0g
-ARG OPENSSL_SHA256="de4d501267da39310905cb6dc8c6121f7a2cad45a7707f76df828fe1b85073af"
+ARG OPENSSL_VERSION=1.1.1b
+ARG OPENSSL_SHA256="5c557b023230413dfb0756f3137a13e6d726838ccd1430888ad15bfb2b43ea4b"
 RUN cd /usr/local/src \
   && wget "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" -O "openssl-${OPENSSL_VERSION}.tar.gz" \
   && echo "$OPENSSL_SHA256" "openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c - \
@@ -26,11 +27,11 @@ RUN cd /usr/local/src \
   && ./config no-async shared --prefix=/usr/local/ssl --openssldir=/usr/local/ssl -Wl,-rpath,/usr/local/ssl/lib \
   && make && make install \
   && cp /usr/local/ssl/bin/openssl /usr/bin/openssl \
-  && rm -rf "/usr/local/src/openssl-${OPENSSL_VERSION}.tar.gz" "/usr/local/src/openssl-${OPENSSL_VERSION}" 
+  && rm -rf "/usr/local/src/openssl-${OPENSSL_VERSION}.tar.gz" "/usr/local/src/openssl-${OPENSSL_VERSION}"
 
 # Build GOST-engine for OpenSSL
-ARG GOST_ENGINE_VERSION=3bd506dcbb835c644bd15a58f0073ae41f76cb06
-ARG GOST_ENGINE_SHA256="4777b1dcb32f8d06abd5e04a9a2b5fe9877c018db0fc02f5f178f8a66b562025"
+ARG GOST_ENGINE_VERSION=7e94620db548fa4810797e9237d3722e0b1861ab
+ARG GOST_ENGINE_SHA256="b134ec7cb130ca2be52c3869064485905b619c0b5d9cdb963fa617016bb36099"
 RUN apk add  --no-cache --virtual .build-deps cmake unzip \
   && cd /usr/local/src \
   && wget "https://github.com/gost-engine/engine/archive/${GOST_ENGINE_VERSION}.zip" -O gost-engine.zip \
@@ -47,7 +48,7 @@ RUN apk add  --no-cache --virtual .build-deps cmake unzip \
   && cp gostsum gost12sum /usr/local/bin \
   && cd .. \
   && cp bin/gost.so /usr/local/ssl/lib/engines-1.1 \
-  && rm -rf "/usr/local/src/gost-engine.zip" "/usr/local/src/engine-${GOST_ENGINE_VERSION}" 
+  && rm -rf "/usr/local/src/gost-engine.zip" "/usr/local/src/engine-${GOST_ENGINE_VERSION}"
 
 # Enable engine
 RUN sed -i '6i openssl_conf=openssl_def' /usr/local/ssl/openssl.cnf \
@@ -68,8 +69,8 @@ RUN sed -i '6i openssl_conf=openssl_def' /usr/local/ssl/openssl.cnf \
   && echo "CRYPT_PARAMS = id-Gost28147-89-CryptoPro-A-ParamSet" >> /usr/local/ssl/openssl.cnf
 
 # Rebuild curl
-ARG CURL_VERSION=7.59.0
-ARG CURL_SHA256="099d9c32dc7b8958ca592597c9fabccdf4c08cfb7c114ff1afbbc4c6f13c9e9e"
+ARG CURL_VERSION=7.64.0
+ARG CURL_SHA256="cb90d2eb74d4e358c1ed1489f8e3af96b50ea4374ad71f143fa4595e998d81b5"
 RUN cd /usr/local/src \
   && wget "https://curl.haxx.se/download/curl-${CURL_VERSION}.tar.gz" -O "curl-${CURL_VERSION}.tar.gz" \
   && echo "$CURL_SHA256" "curl-${CURL_VERSION}.tar.gz" | sha256sum -c - \
@@ -81,10 +82,10 @@ RUN cd /usr/local/src \
   && make install \
   && ln -s /usr/local/curl/bin/curl /usr/bin/curl \
   && rm -rf "/usr/local/src/curl-${CURL_VERSION}.tar.gz" "/usr/local/src/curl-${CURL_VERSION}"
-  
+
 # Rebuild stunnel
-ARG STUNNEL_VERSION=5.50
-ARG STUNNEL_SHA256="951d92502908b852a297bd9308568f7c36598670b84286d3e05d4a3a550c0149"
+ARG STUNNEL_VERSION=5.55
+ARG STUNNEL_SHA256="90de69f41c58342549e74c82503555a6426961b29af3ed92f878192727074c62"
 RUN cd /usr/local/src \
   && wget "https://www.stunnel.org/downloads/stunnel-${STUNNEL_VERSION}.tar.gz" -O "stunnel-${STUNNEL_VERSION}.tar.gz" \
   && echo "$STUNNEL_SHA256" "stunnel-${STUNNEL_VERSION}.tar.gz" | sha256sum -c - \

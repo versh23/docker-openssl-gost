@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_BASE_URL="https://raw.githubusercontent.com/docker-library/php/master/7.2/stretch/fpm"
+DOCKER_BASE_URL="https://raw.githubusercontent.com/docker-library/php/master/7.3/stretch/fpm"
 ORIGINAL_INSTRUCTION="FROM debian:stretch-slim"
 
 DOCKER_BUILD_FILES=( Dockerfile docker-php-entrypoint docker-php-ext-configure docker-php-ext-enable docker-php-ext-install docker-php-source)

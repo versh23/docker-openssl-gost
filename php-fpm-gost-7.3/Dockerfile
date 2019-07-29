@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM test-gost AS openssl-gost
+FROM versh23/docker-openssl-gost:alpine-3.9 AS openssl-gost
 
 FROM alpine:3.9
 
